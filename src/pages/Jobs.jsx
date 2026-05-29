@@ -48,7 +48,7 @@ export default function Jobs() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-slate-800">Jobs</h1>
+      <h1 className="text-2xl font-bold text-slate-800 brand-heading tracking-wide">Jobs</h1>
 
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
         {tabs.map(t => (

@@ -70,7 +70,7 @@ export default function Estimate() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-800">New Estimate</h1>
+      <h1 className="text-2xl font-bold text-slate-800 brand-heading tracking-wide">New Estimate</h1>
 
       {/* Customer */}
       <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 space-y-3">

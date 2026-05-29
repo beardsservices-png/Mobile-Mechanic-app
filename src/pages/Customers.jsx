@@ -18,7 +18,7 @@ export default function Customers() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">Customers</h1>
+        <h1 className="text-2xl font-bold text-slate-800 brand-heading tracking-wide">Customers</h1>
         <span className="text-sm text-slate-500">{CUSTOMERS.length} total</span>
       </div>
 
