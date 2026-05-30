@@ -40,7 +40,7 @@ app.use('/api/reports',   reportsRouter)
 if (IS_PROD) {
   const distPath = join(__dirname, '..', 'dist')
   app.use(express.static(distPath))
-  app.get('*', (req, res) => {
+  app.get('/*splat', (req, res) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(join(distPath, 'index.html'))
     }
