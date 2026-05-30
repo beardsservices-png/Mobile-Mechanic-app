@@ -1,92 +1,100 @@
-import { useState } from 'react'
-import { CUSTOMERS } from '../data'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { customers as customersApi, checkin as checkinApi } from '../api'
 
 const SYMPTOMS = [
-  { key: 'grinding',     label: '🔩 Grinding',        desc: 'Metal-on-metal grinding sound' },
-  { key: 'squealing',    label: '📢 Squealing',        desc: 'High-pitched squeal or squeak' },
-  { key: 'no-start',     label: '🔋 Won\'t Start',     desc: 'Clicks, cranks, or nothing' },
-  { key: 'rough-idle',   label: '⚙️ Rough Idle',       desc: 'Shaking, surging, or stalling at idle' },
-  { key: 'vibration',    label: '📳 Vibration',        desc: 'Shaking at speed or while braking' },
-  { key: 'transmission', label: '🔄 Transmission',     desc: 'Slipping, hard shifts, no movement' },
-  { key: 'overheating',  label: '🌡️ Overheating',      desc: 'Temp gauge high, steam, coolant smell' },
-  { key: 'oil-leak',     label: '🛢️ Oil Leak',         desc: 'Spot on ground, burning smell' },
-  { key: 'check-engine', label: '⚠️ Check Engine',     desc: 'CEL on — solid or flashing' },
-  { key: 'maintenance',  label: '🔧 Maintenance',      desc: 'Routine service, oil change, etc.' },
-  { key: 'other',        label: '❓ Other',            desc: 'Something else — describe below' },
+  { key: 'grinding',     label: '🔩 Grinding',      desc: 'Metal-on-metal grinding sound' },
+  { key: 'squealing',    label: '📢 Squealing',      desc: 'High-pitched squeal or squeak' },
+  { key: 'no-start',     label: '🔋 Won\'t Start',   desc: 'Clicks, cranks, or nothing' },
+  { key: 'rough-idle',   label: '⚙️ Rough Idle',     desc: 'Shaking, surging, or stalling' },
+  { key: 'vibration',    label: '📳 Vibration',      desc: 'Shaking at speed or braking' },
+  { key: 'transmission', label: '🔄 Transmission',   desc: 'Slipping, hard shifts' },
+  { key: 'overheating',  label: '🌡️ Overheating',    desc: 'Temp high, steam, coolant smell' },
+  { key: 'oil-leak',     label: '🛢️ Oil Leak',       desc: 'Spot on ground, burning smell' },
+  { key: 'check-engine', label: '⚠️ Check Engine',   desc: 'CEL on — solid or flashing' },
+  { key: 'maintenance',  label: '🔧 Maintenance',    desc: 'Routine service, oil change, etc.' },
+  { key: 'other',        label: '❓ Other',          desc: 'Something else — describe below' },
 ]
 
-const MAKES = ['Ford', 'Chevrolet', 'GMC', 'Dodge', 'Ram', 'Toyota', 'Honda', 'Jeep', 'Subaru', 'Nissan', 'Hyundai', 'Kia', 'Mazda', 'Volkswagen', 'BMW', 'Mercedes', 'Chrysler', 'Buick', 'Cadillac', 'Lincoln', 'Other']
+const MAKES = ['Ford','Chevrolet','GMC','Dodge','Ram','Toyota','Honda','Jeep','Subaru','Nissan','Hyundai','Kia','Mazda','Volkswagen','BMW','Mercedes','Chrysler','Buick','Cadillac','Lincoln','Other']
 
 export default function CheckIn() {
-  const [step, setStep] = useState(1) // 1=customer, 2=vehicle, 3=complaint, 4=confirm
-  const [customerType, setCustomerType] = useState('existing') // existing | new
-  const [customerId, setCustomerId] = useState('')
+  const navigate = useNavigate()
+  const [step,         setStep]         = useState(1)
+  const [customerType, setCustomerType] = useState('existing')
+  const [customerId,   setCustomerId]   = useState('')
+  const [vehicleId,    setVehicleId]    = useState('')
+  const [customerList, setCustomerList] = useState([])
+  const [vehicleList,  setVehicleList]  = useState([])
+  const [submitting,   setSubmitting]   = useState(false)
   const [form, setForm] = useState({
-    name: '', phone: '', year: '', make: '', model: '', plate: '', mileage: '',
-    color: '', vin: '', complaint: '', symptom: '',
+    name: '', phone: '', year: '', make: '', model: '', plate: '',
+    mileage: '', color: '', vin: '', complaint: '', symptom: '',
   })
-  const [submitted, setSubmitted] = useState(false)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const selectedCustomer = CUSTOMERS.find(c => c.id === Number(customerId))
+  useEffect(() => {
+    customersApi.list().then(setCustomerList).catch(() => {})
+  }, [])
 
-  const handleExistingSelect = (id) => {
+  const handleExistingSelect = async id => {
     setCustomerId(id)
-    const c = CUSTOMERS.find(c => c.id === Number(id))
-    if (c) {
-      const parts = c.vehicle.split(' ')
-      const year = parts[0]
-      const make = parts[1]
-      const model = parts.slice(2).join(' ')
-      setForm(f => ({ ...f, name: c.name, phone: c.phone, year, make, model, plate: c.plate || '' }))
+    setVehicleId('')
+    const c = customerList.find(c => c.id === Number(id))
+    if (c) set('name', c.name)
+
+    if (id) {
+      try {
+        const { vehicles } = await customersApi.get(id)
+        setVehicleList(vehicles || [])
+      } catch { setVehicleList([]) }
     }
   }
 
-  if (submitted) {
-    const vehicle = `${form.year} ${form.make} ${form.model}`.trim()
-    const sym = SYMPTOMS.find(s => s.key === form.symptom)
-    return (
-      <div className="max-w-lg mx-auto space-y-6">
-        <div className="bg-[#121212] rounded-2xl p-6 text-center space-y-4 border border-amber-500/30">
-          <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto">
-            <svg className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-white" style={{fontFamily:'Barlow Condensed,sans-serif',letterSpacing:'0.05em'}}>CUSTOMER CHECKED IN</h2>
-          <div className="text-left bg-slate-800 rounded-xl p-4 space-y-2">
-            <Row label="Name"     value={form.name} />
-            <Row label="Phone"    value={form.phone} />
-            <Row label="Vehicle"  value={vehicle} />
-            <Row label="Plate"    value={form.plate || '—'} />
-            <Row label="Mileage"  value={form.mileage ? `${form.mileage} mi` : '—'} />
-            <Row label="Symptom"  value={sym?.label || form.symptom} />
-            {form.complaint && <Row label="Complaint" value={form.complaint} />}
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => { setStep(1); setForm({ name:'',phone:'',year:'',make:'',model:'',plate:'',mileage:'',color:'',vin:'',complaint:'',symptom:'' }); setCustomerId(''); setSubmitted(false) }}
-              className="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition-colors"
-            >New Check-In</button>
-            <a href="/intel"
-              className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-colors text-center"
-            >View Vehicle Intel →</a>
-          </div>
-        </div>
-      </div>
-    )
+  const handleVehicleSelect = id => {
+    setVehicleId(id)
+    const v = vehicleList.find(v => v.id === Number(id))
+    if (v) {
+      setForm(f => ({
+        ...f,
+        year: v.year || '', make: v.make || '', model: v.model || '',
+        plate: v.plate || '', color: v.color || '', vin: v.vin || '',
+        mileage: v.mileage_last ? String(v.mileage_last) : '',
+      }))
+    }
   }
+
+  const handleSubmit = async () => {
+    setSubmitting(true)
+    try {
+      const body = {
+        customer_id: customerType === 'existing' ? customerId || undefined : undefined,
+        name:   customerType === 'new' ? form.name : undefined,
+        phone:  customerType === 'new' ? form.phone : undefined,
+        vehicle_id: vehicleId || undefined,
+        year: form.year, make: form.make, model: form.model,
+        plate: form.plate, mileage: form.mileage, color: form.color, vin: form.vin,
+        symptom: form.symptom, complaint: form.complaint,
+        date: new Date().toISOString().slice(0,10),
+      }
+      const job = await checkinApi.submit(body)
+      navigate(`/jobs/${job.id}`)
+    } catch (err) {
+      alert('Check-in failed: ' + err.message)
+      setSubmitting(false)
+    }
+  }
+
+  const selectedCustomer = customerList.find(c => c.id === Number(customerId))
 
   return (
     <div className="max-w-lg mx-auto space-y-5">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 brand-heading">Customer Check-In</h1>
           <p className="text-sm text-slate-500 mt-0.5">Step {step} of 4</p>
         </div>
-        {/* Step dots */}
         <div className="flex gap-2">
           {[1,2,3,4].map(n => (
             <div key={n} className={`w-2.5 h-2.5 rounded-full transition-colors ${n <= step ? 'bg-orange-500' : 'bg-slate-200'}`} />
@@ -94,7 +102,7 @@ export default function CheckIn() {
         </div>
       </div>
 
-      {/* ── STEP 1: CUSTOMER ── */}
+      {/* STEP 1 */}
       {step === 1 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
           <h2 className="font-bold text-slate-700 brand-heading text-lg">Who's the customer?</h2>
@@ -102,24 +110,38 @@ export default function CheckIn() {
           <div className="flex gap-2">
             {['existing','new'].map(t => (
               <button key={t} onClick={() => setCustomerType(t)}
-                className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors capitalize ${customerType === t ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${customerType === t ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
                 {t === 'existing' ? '📋 Existing' : '➕ New Customer'}
               </button>
             ))}
           </div>
 
           {customerType === 'existing' ? (
-            <select value={customerId} onChange={e => handleExistingSelect(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
-              <option value="">-- Select customer --</option>
-              {CUSTOMERS.map(c => (
-                <option key={c.id} value={c.id}>{c.name} — {c.vehicle}</option>
-              ))}
-            </select>
+            <>
+              <select value={customerId} onChange={e => handleExistingSelect(e.target.value)}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+                <option value="">-- Select customer --</option>
+                {customerList.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}{c.phone ? ` — ${c.phone}` : ''}</option>
+                ))}
+              </select>
+              {customerId && vehicleList.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Vehicle on file</p>
+                  <select value={vehicleId} onChange={e => handleVehicleSelect(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+                    <option value="">-- Select vehicle or add new --</option>
+                    {vehicleList.map(v => (
+                      <option key={v.id} value={v.id}>{v.year} {v.make} {v.model} {v.plate ? `· ${v.plate}` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
           ) : (
             <div className="space-y-3">
-              <Input label="Full Name" value={form.name} onChange={v => set('name', v)} placeholder="First Last" />
-              <Input label="Phone Number" value={form.phone} onChange={v => set('phone', v)} placeholder="(870) 555-0000" type="tel" />
+              <Field label="Full Name"     value={form.name}  onChange={v => set('name', v)}  placeholder="First Last" />
+              <Field label="Phone Number"  value={form.phone} onChange={v => set('phone', v)} placeholder="(870) 555-0000" type="tel" />
             </div>
           )}
 
@@ -132,16 +154,16 @@ export default function CheckIn() {
         </div>
       )}
 
-      {/* ── STEP 2: VEHICLE ── */}
+      {/* STEP 2 */}
       {step === 2 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-slate-700 brand-heading text-lg">Vehicle Info</h2>
-            <span className="text-sm font-medium text-orange-600">{form.name}</span>
+            <span className="text-sm font-medium text-orange-600">{form.name || selectedCustomer?.name}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Year" value={form.year} onChange={v => set('year', v)} placeholder="2019" />
+            <Field label="Year"  value={form.year}  onChange={v => set('year', v)}  placeholder="2019" />
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Make</label>
               <select value={form.make} onChange={e => set('make', e.target.value)}
@@ -152,31 +174,27 @@ export default function CheckIn() {
             </div>
           </div>
 
-          <Input label="Model" value={form.model} onChange={v => set('model', v)} placeholder="F-150, Camry, Silverado…" />
-
+          <Field label="Model"         value={form.model}   onChange={v => set('model', v)}   placeholder="F-150, Camry…" />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="License Plate" value={form.plate} onChange={v => set('plate', v.toUpperCase())} placeholder="ARK 1234" />
-            <Input label="Mileage" value={form.mileage} onChange={v => set('mileage', v)} placeholder="87,500" />
+            <Field label="License Plate" value={form.plate}   onChange={v => set('plate', v.toUpperCase())} placeholder="ARK 1234" />
+            <Field label="Mileage"       value={form.mileage} onChange={v => set('mileage', v)} placeholder="87,500" />
           </div>
-
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Color" value={form.color} onChange={v => set('color', v)} placeholder="White, Black…" />
-            <Input label="VIN (optional)" value={form.vin} onChange={v => set('vin', v)} placeholder="Last 6 ok" />
+            <Field label="Color"         value={form.color}   onChange={v => set('color', v)}  placeholder="White, Black…" />
+            <Field label="VIN (optional)"value={form.vin}     onChange={v => set('vin', v)}    placeholder="Last 6 ok" />
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(1)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors">← Back</button>
-            <button
-              onClick={() => setStep(3)}
-              disabled={!form.year || !form.make || !form.model}
-              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-semibold transition-colors">
+            <button onClick={() => setStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold">← Back</button>
+            <button onClick={() => setStep(3)} disabled={!form.year || !form.make || !form.model}
+              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-semibold">
               Next → Complaint
             </button>
           </div>
         </div>
       )}
 
-      {/* ── STEP 3: COMPLAINT ── */}
+      {/* STEP 3 */}
       {step === 3 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
           <div>
@@ -199,55 +217,46 @@ export default function CheckIn() {
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer's Description</label>
-            <textarea
-              value={form.complaint}
-              onChange={e => set('complaint', e.target.value)}
-              placeholder="In their own words — what are they hearing, feeling, seeing? When does it happen?"
-              rows={3}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-            />
+            <textarea value={form.complaint} onChange={e => set('complaint', e.target.value)}
+              placeholder="In their own words — what are they hearing, feeling, seeing?"
+              rows={3} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors">← Back</button>
-            <button
-              onClick={() => setStep(4)}
-              disabled={!form.symptom}
-              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-semibold transition-colors">
+            <button onClick={() => setStep(2)} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold">← Back</button>
+            <button onClick={() => setStep(4)} disabled={!form.symptom}
+              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-semibold">
               Next → Review
             </button>
           </div>
         </div>
       )}
 
-      {/* ── STEP 4: CONFIRM ── */}
+      {/* STEP 4 */}
       {step === 4 && (
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
           <h2 className="font-bold text-slate-700 brand-heading text-lg">Confirm Check-In</h2>
 
           <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Customer</div>
-            <Row label="Name"  value={form.name} />
-            <Row label="Phone" value={form.phone || '—'} />
-            <div className="border-t border-slate-200 my-2" />
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Vehicle</div>
+            <SectionLabel>Customer</SectionLabel>
+            <Row label="Name"  value={form.name || selectedCustomer?.name} />
+            <Row label="Phone" value={form.phone || selectedCustomer?.phone || '—'} />
+            <Divider />
+            <SectionLabel>Vehicle</SectionLabel>
             <Row label="Vehicle"  value={`${form.year} ${form.make} ${form.model}`} />
             <Row label="Plate"    value={form.plate || '—'} />
             <Row label="Mileage"  value={form.mileage ? `${form.mileage} mi` : '—'} />
-            <Row label="Color"    value={form.color || '—'} />
-            {form.vin && <Row label="VIN" value={form.vin} />}
-            <div className="border-t border-slate-200 my-2" />
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Complaint</div>
-            <Row label="Symptom"   value={SYMPTOMS.find(s => s.key === form.symptom)?.label || '—'} />
+            <Divider />
+            <SectionLabel>Complaint</SectionLabel>
+            <Row label="Symptom" value={SYMPTOMS.find(s => s.key === form.symptom)?.label || '—'} />
             {form.complaint && <Row label="Notes" value={form.complaint} />}
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(3)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition-colors">← Edit</button>
-            <button
-              onClick={() => setSubmitted(true)}
-              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
-              ✓ Check In Customer
+            <button onClick={() => setStep(3)} className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold">← Edit</button>
+            <button onClick={handleSubmit} disabled={submitting}
+              className="flex-[2] py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-semibold">
+              {submitting ? 'Checking in…' : '✓ Check In Customer'}
             </button>
           </div>
         </div>
@@ -256,17 +265,12 @@ export default function CheckIn() {
   )
 }
 
-function Input({ label, value, onChange, placeholder, type = 'text' }) {
+function Field({ label, value, onChange, placeholder, type = 'text' }) {
   return (
     <div className="space-y-1">
       <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-      />
+      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
     </div>
   )
 }
@@ -278,4 +282,12 @@ function Row({ label, value }) {
       <span className="text-slate-800 font-medium text-right">{value}</span>
     </div>
   )
+}
+
+function SectionLabel({ children }) {
+  return <div className="text-xs font-bold text-slate-400 uppercase tracking-wider pt-1">{children}</div>
+}
+
+function Divider() {
+  return <div className="border-t border-slate-200 my-1" />
 }
