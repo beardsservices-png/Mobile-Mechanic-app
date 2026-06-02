@@ -129,7 +129,7 @@ export default function Guide() {
     <div className="max-w-lg mx-auto space-y-4">
       <div className="bg-[#121212] rounded-2xl p-5 text-center space-y-2">
         <h1 className="text-2xl font-bold text-white brand-heading">User Guide</h1>
-        <p className="text-amber-400 text-sm">How to use your Dymon in the Rough app</p>
+        <p className="text-amber-400 text-sm">How to use your PureMechanic app</p>
         <p className="text-slate-400 text-xs mt-2 leading-relaxed">
           Tap any section below to see step-by-step instructions.
           If you ever get stuck, call your app developer.

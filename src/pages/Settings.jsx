@@ -7,10 +7,10 @@ export default function Settings() {
       <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 space-y-3">
         <h2 className="font-semibold text-slate-700">Business Info</h2>
         <div className="space-y-2 text-sm">
-          <Row label="Business Name" value="Dymon in the Rough" />
+          <Row label="Business Name" value="PureMechanic" />
           <Row label="Type"          value="Mobile Mechanic" />
           <Row label="Phone"         value="417-651-3040" />
-          <Row label="Website"       value="dymonintherough.com" />
+          <Row label="Website"       value="puremechanic.com" />
         </div>
         <p className="text-xs text-slate-400">Contact your developer to update business info.</p>
       </div>
@@ -46,14 +46,14 @@ export default function Settings() {
           <span className="text-slate-300">→</span>
         </a>
         <a href="tel:417-651-3040" className="flex items-center justify-between py-2 text-sm text-slate-700 hover:text-orange-500">
-          <span>Call Dymon in the Rough</span>
+          <span>Call PureMechanic</span>
           <span className="text-slate-300">→</span>
         </a>
       </div>
 
       {/* About */}
       <div className="bg-[#121212] rounded-xl p-4 text-center space-y-1">
-        <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase">Dymon in the Rough</p>
+        <p className="text-amber-400 text-xs font-semibold tracking-widest uppercase">PureMechanic</p>
         <p className="text-slate-400 text-xs">Mobile Mechanic Business App</p>
         <p className="text-slate-600 text-xs mt-2">No Tow. No Shop. No Compromise.</p>
       </div>
