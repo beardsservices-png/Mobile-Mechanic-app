@@ -5,6 +5,7 @@ import Customers from './pages/Customers'
 import Estimate from './pages/Estimate'
 import CheckIn from './pages/CheckIn'
 import VehicleIntel from './pages/VehicleIntel'
+import JobDetail from './pages/JobDetail'
 
 function PureMechanicMark({ size = 40 }) {
   return (
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/"          element={<Dashboard />} />
             <Route path="/checkin"   element={<CheckIn />} />
             <Route path="/jobs"      element={<Jobs />} />
+            <Route path="/jobs/:id"    element={<JobDetail />} />
             <Route path="/intel"     element={<VehicleIntel />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/estimate"  element={<Estimate />} />
