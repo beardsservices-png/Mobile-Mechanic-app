@@ -23,7 +23,7 @@ const app  = express()
 const PORT = process.env.PORT || 3001
 const IS_PROD = process.env.NODE_ENV === 'production'
 
-app.use(express.json())
+app.use(express.json({ limit: '25mb' }))
 
 if (!IS_PROD) {
   app.use(cors({ origin: ['http://localhost:5174', 'http://localhost:5173'] }))

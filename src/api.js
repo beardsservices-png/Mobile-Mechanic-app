@@ -106,5 +106,6 @@ export const settings = {
 
 // ── AI ──
 export const ai = {
-  chat: (messages) => api.post('/api/ai/chat', { messages }),
+  chat:  (messages)                       => api.post('/api/ai/chat', { messages }),
+  audio: (audioBase64, mimeType, context) => api.post('/api/ai/audio', { audioBase64, mimeType, context }),
 }

@@ -43,4 +43,49 @@ router.post('/chat', async (req, res) => {
   }
 })
 
+router.post('/audio', async (req, res) => {
+  const { audioBase64, mimeType, context } = req.body
+  if (!audioBase64) return res.status(400).json({ error: 'audioBase64 required' })
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI assistant not configured. Add ANTHROPIC_API_KEY to Railway environment variables.' })
+  }
+
+  const contextText = context?.trim() ||
+    'Analyze this vehicle sound recording. List the top 3 most likely causes of this noise, what to inspect first, and flag any safety-critical concerns. Be concise.'
+
+  try {
+    const client = new Anthropic({ apiKey })
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: [
+          {
+            type: 'document',
+            source: {
+              type: 'base64',
+              media_type: mimeType || 'audio/wav',
+              data: audioBase64,
+            },
+          },
+          { type: 'text', text: contextText },
+        ],
+      }],
+    })
+    res.json({ content: response.content[0].text })
+  } catch (err) {
+    console.error('AI audio error:', err.message)
+    const isUnsupported = /unsupported|invalid.*media|audio/i.test(err.message)
+    res.status(500).json({
+      error: isUnsupported
+        ? 'Direct audio analysis is not available for this file type. Try the chat instead — describe the sound, when it happens, and the vehicle. Claude diagnoses very accurately from descriptions.'
+        : (err.message || 'Audio analysis failed'),
+    })
+  }
+})
+
 export default router
