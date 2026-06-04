@@ -97,3 +97,14 @@ export const reports = {
   mileage:  (year)     => api.get(`/api/reports/mileage?year=${year||''}`),
   expenses: (year)     => api.get(`/api/reports/expenses?year=${year||''}`),
 }
+
+// ── Settings ──
+export const settings = {
+  get:    ()     => api.get('/api/settings'),
+  update: (body) => api.put('/api/settings', body),
+}
+
+// ── AI ──
+export const ai = {
+  chat: (messages) => api.post('/api/ai/chat', { messages }),
+}

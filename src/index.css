@@ -1,11 +1,32 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
 
-body { font-family: 'Barlow', system-ui, sans-serif; background-color: #f8fafc; }
+:root {
+  --midnight: #03080A;
+  --orange:   #E8650A;
+  --gold:     #D2AF41;
+  --chrome:   #B9BEC8;
+  --bone:     #F5F2EE;
+}
+
+body {
+  font-family: 'Tektur', system-ui, sans-serif;
+  background-color: #f8fafc;
+}
 
 .brand-heading {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+.brand-sub {
+  font-family: 'Tektur', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mono {
+  font-family: 'Geist Mono', 'Courier New', monospace;
 }

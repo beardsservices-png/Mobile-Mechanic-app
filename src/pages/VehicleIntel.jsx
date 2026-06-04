@@ -35,7 +35,7 @@ export default function VehicleIntel() {
   return (
     <div className="space-y-5 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="bg-[#121212] rounded-2xl p-5 border border-amber-500/20">
+      <div className="rounded-2xl p-5 border" style={{ background: '#03080A', borderColor: 'rgba(210,175,65,0.2)' }}>
         <div className="flex items-start gap-3">
           <div className="text-3xl">🔍</div>
           <div>
@@ -99,10 +99,10 @@ export default function VehicleIntel() {
           {searched && intel && (
             <div className="space-y-4">
               {/* Vehicle banner */}
-              <div className="bg-[#121212] rounded-2xl px-5 py-4 flex items-center justify-between border border-amber-500/20">
+              <div className="rounded-2xl px-5 py-4 flex items-center justify-between border" style={{ background: '#03080A', borderColor: 'rgba(210,175,65,0.2)' }}>
                 <div>
                   <div className="text-lg font-bold text-white brand-heading tracking-wide">{year} {make} {model}</div>
-                  <div className="text-xs text-amber-400 mt-0.5 tracking-wider uppercase">Intel Loaded</div>
+                  <div className="text-xs mt-0.5 tracking-wider uppercase font-semibold" style={{ color: '#D2AF41' }}>Intel Loaded</div>
                 </div>
                 <div className="text-3xl">🚗</div>
               </div>

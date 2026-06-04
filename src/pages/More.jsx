@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 
 const LINKS = [
-  { to: '/estimate',  label: 'New Estimate',   icon: '🧾', desc: 'Build a quote for a customer' },
-  { to: '/intel',     label: 'Vehicle Intel',  icon: '🔍', desc: 'Look up symptoms & parts' },
-  { to: '/mileage',   label: 'Mileage Log',    icon: '📍', desc: 'Track business trips for taxes' },
-  { to: '/expenses',  label: 'Expenses',       icon: '💰', desc: 'Log parts, supplies, tools' },
-  { to: '/settings',  label: 'Settings',       icon: '⚙️', desc: 'Business info & preferences' },
-  { to: '/guide',     label: 'User Guide',     icon: '📖', desc: 'How to use this app' },
+  { to: '/ai',       label: 'AI Assistant',   icon: '🤖', desc: 'Diagnostics, repairs, parts, pricing help' },
+  { to: '/schedule', label: 'Schedule',       icon: '📅', desc: 'Weekly view of all your jobs' },
+  { to: '/estimate', label: 'New Estimate',   icon: '🧾', desc: 'Build a quote for a customer' },
+  { to: '/intel',    label: 'Vehicle Intel',  icon: '🔍', desc: 'Look up symptoms & parts' },
+  { to: '/mileage',  label: 'Mileage Log',    icon: '📍', desc: 'Track business trips for taxes' },
+  { to: '/expenses', label: 'Expenses',       icon: '💰', desc: 'Log parts, supplies, tools' },
+  { to: '/settings', label: 'Settings',       icon: '⚙️', desc: 'Business info & preferences' },
+  { to: '/guide',    label: 'User Guide',     icon: '📖', desc: 'How to use this app' },
 ]
 
 export default function More() {

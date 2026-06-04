@@ -1,7 +1,94 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { customers as customersApi } from '../api'
 import { useApi } from '../hooks/useApi'
 import { Badge, fmt, fmtDateFull, Spinner, ErrorMsg } from '../lib/utils'
+
+function buildTemplates(cust) {
+  const name   = cust.name?.split(' ')[0] || cust.name
+  const latestJob  = (cust.jobs || []).find(j => ['scheduled','in-progress'].includes(j.status))
+  const latestDone = (cust.jobs || []).find(j => j.status === 'completed')
+  const latestInv  = (cust.jobs || []).find(j => j.status === 'invoiced')
+  const vehicle    = latestJob?.vehicle || latestDone?.vehicle || ''
+  const amount     = latestInv ? `$${Math.round(latestInv.total || 0)}` : ''
+
+  return [
+    {
+      label: 'Appointment Confirmed',
+      text: `Hi ${name}, your appointment is confirmed! I'll be heading your way shortly. Text me if anything changes. — Pure Mechanic`,
+    },
+    {
+      label: 'On My Way',
+      text: `Hi ${name}, I'm on my way to you now${vehicle ? ` for the ${vehicle}` : ''}. Should be there in about [X] min. — Pure Mechanic`,
+    },
+    {
+      label: 'Job Complete',
+      text: `Hi ${name}, I've finished the work${vehicle ? ` on your ${vehicle}` : ''}. Everything's good to go! I'll send over the invoice shortly. — Pure Mechanic`,
+    },
+    {
+      label: 'Invoice Ready',
+      text: `Hi ${name}, your invoice${amount ? ` for ${amount}` : ''} is ready. Let me know how you'd like to pay — Cash, Card, Venmo, or Zelle. — Pure Mechanic`,
+    },
+    {
+      label: '30-Day Follow-Up',
+      text: `Hi ${name}, just checking in after your recent service${vehicle ? ` on your ${vehicle}` : ''}. How's everything running? — Pure Mechanic`,
+    },
+    {
+      label: 'Estimate Ready',
+      text: `Hi ${name}, I've put together an estimate for the work on your${vehicle ? ` ${vehicle}` : ' vehicle'}. I'll send it over now — let me know if you have any questions. — Pure Mechanic`,
+    },
+  ]
+}
+
+function MessageTemplates({ cust }) {
+  const [open, setOpen]     = useState(false)
+  const [copied, setCopied] = useState(null)
+  const templates           = buildTemplates(cust)
+
+  function copy(text, i) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(i)
+      setTimeout(() => setCopied(null), 2000)
+    })
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <button onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">💬</span>
+          <span className="font-semibold text-slate-700 text-sm">Message Templates</span>
+        </div>
+        <span className="text-slate-300 text-sm">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-slate-100 divide-y divide-slate-50">
+          {templates.map((t, i) => (
+            <div key={i} className="px-4 py-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.label}</span>
+                <button onClick={() => copy(t.text, i)}
+                  className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors ${
+                    copied === i
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-orange-50 text-orange-500 hover:bg-orange-100'
+                  }`}>
+                  {copied === i ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">{t.text}</p>
+            </div>
+          ))}
+          <div className="px-4 py-2.5 bg-slate-50">
+            <p className="text-[10px] text-slate-300">Tap Copy, then paste into your SMS app to send</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function CustomerDetail() {
   const { id } = useParams()
@@ -20,7 +107,7 @@ export default function CustomerDetail() {
       <Link to="/customers" className="text-sm text-orange-500 font-medium">← Customers</Link>
 
       {/* Header */}
-      <div className="bg-[#121212] rounded-2xl p-5 space-y-3">
+      <div className="rounded-2xl p-5 space-y-3" style={{ background: '#03080A' }}>
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white brand-heading">{cust.name}</h1>
@@ -28,7 +115,7 @@ export default function CustomerDetail() {
             {cust.email && <p className="text-slate-400 text-sm">{cust.email}</p>}
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-amber-400">{fmt(totalSpent)}</p>
+            <p className="text-2xl font-bold" style={{ color: '#D2AF41' }}>{fmt(totalSpent)}</p>
             <p className="text-xs text-slate-400">lifetime value</p>
           </div>
         </div>
@@ -64,6 +151,9 @@ export default function CustomerDetail() {
           </div>
         </div>
       )}
+
+      {/* Message templates */}
+      <MessageTemplates cust={cust} />
 
       {/* Job history */}
       <div className="space-y-2">

@@ -129,7 +129,30 @@ db.exec(`
     receipt_note TEXT,
     created_at   TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+  );
 `)
+
+// Seed default settings if empty
+const settingsCount = db.prepare('SELECT COUNT(*) as n FROM settings').get()
+if (settingsCount.n === 0) {
+  const ins = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)')
+  const defaults = [
+    ['business_name',   'Pure Mechanic'],
+    ['business_type',   'Traveling Mechanic'],
+    ['phone',           '417-651-3040'],
+    ['website',         'puremechanic.com'],
+    ['labor_rate',      '85'],
+    ['markup',          '20'],
+    ['invoice_due_days','14'],
+    ['mileage_rate',    '0.67'],
+    ['tax_year',        String(new Date().getFullYear())],
+  ]
+  for (const [k, v] of defaults) ins.run(k, v)
+}
 
 // One-time wipe of demo data — runs if the wipe flag isn't set yet
 const wiped = db.prepare("SELECT COUNT(*) as n FROM customers WHERE name IN ('Tom Harris','Sarah Mitchell','Dave Kowalski','Jennifer Park','Bob Cramer','Ashley Torres','Carl Whitman','Megan Flores')").get()

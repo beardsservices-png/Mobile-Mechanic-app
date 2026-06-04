@@ -1,13 +1,13 @@
 import PDFDocument from 'pdfkit'
 
 const BRAND = {
-  name: 'DYMON IN THE ROUGH',
-  subtitle: 'Mobile Mechanic',
+  name: 'PURE MECHANIC',
+  subtitle: 'Traveling Mechanic',
   phone: '417-651-3040',
-  black: '#121212',
+  black: '#03080A',
   orange: '#E8650A',
-  gold: '#C8A84B',
-  footer: 'Quality repairs wherever you are. No upfront payment required.',
+  gold: '#D2AF41',
+  footer: 'Quality Repairs & Car Care. No Tow. No Shop. No Compromise.',
 }
 
 function fmtMoney(n) {
@@ -33,7 +33,7 @@ export function generateEstimatePDF(est, stream) {
   doc.font('Helvetica-Bold').fontSize(22).fillColor('white')
      .text(BRAND.name, 50, 20)
 
-  doc.font('Helvetica').fontSize(11).fillColor('#C8A84B')
+  doc.font('Helvetica').fontSize(11).fillColor('#D2AF41')
      .text(BRAND.subtitle, 50, 46)
 
   doc.font('Helvetica').fontSize(11).fillColor('#E8650A')
@@ -132,7 +132,7 @@ export function generateEstimatePDF(est, stream) {
   const footerY = doc.page.height - 60
   doc.rect(0, footerY - 5, doc.page.width, 65).fill(BRAND.black)
   doc.rect(0, footerY - 5, doc.page.width, 2).fill(BRAND.gold)
-  doc.font('Helvetica').fontSize(9).fillColor('#c8a84b')
+  doc.font('Helvetica').fontSize(9).fillColor('#D2AF41')
      .text(BRAND.footer, 50, footerY + 5, { align: 'center', width: doc.page.width - 100 })
   doc.font('Helvetica-Bold').fontSize(9).fillColor(BRAND.orange)
      .text(BRAND.phone, 50, footerY + 20, { align: 'center', width: doc.page.width - 100 })
