@@ -1436,10 +1436,17 @@ footer {
         message: document.getElementById('message').value,
       }
       try {
-        const res = await fetch('https://mobile-mechanic-app-production-af42.up.railway.app/api/contact', {
+        const formData = new FormData()
+        formData.append('access_key', 'PUREMECHANIC_W3F_KEY')
+        formData.append('subject', 'New Website Inquiry — ' + data.name + (data.vehicle ? ' · ' + data.vehicle : ''))
+        formData.append('from_name', 'PureMechanic Website')
+        formData.append('name', data.name)
+        formData.append('phone', data.phone || 'Not provided')
+        formData.append('vehicle', data.vehicle || 'Not provided')
+        formData.append('message', data.message)
+        const res = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: formData
         })
         const json = await res.json()
         if (json.success) {
@@ -1447,7 +1454,7 @@ footer {
           status.textContent = '✓ Message sent! Dymon will be in touch soon.'
           contactForm.reset()
         } else {
-          throw new Error(json.error || 'Submission failed')
+          throw new Error('Submission failed')
         }
       } catch(err) {
         status.style.cssText = 'display:block;color:#f97316;padding:12px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);'
