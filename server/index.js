@@ -15,6 +15,7 @@ import expensesRouter  from './routes/expenses.js'
 import reportsRouter   from './routes/reports.js'
 import settingsRouter  from './routes/settings.js'
 import aiRouter        from './routes/ai.js'
+import contactRouter   from './routes/contact.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname  = dirname(__filename)
@@ -38,6 +39,7 @@ app.use('/api/invoices',  invoicesRouter)
 app.use('/api/mileage',   mileageRouter)
 app.use('/api/expenses',  expensesRouter)
 app.use('/api/reports',   reportsRouter)
+app.use('/api/contact',   contactRouter)
 app.use('/api/settings',  settingsRouter)
 app.use('/api/ai',        aiRouter)
 

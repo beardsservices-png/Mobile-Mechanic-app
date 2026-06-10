@@ -1332,7 +1332,7 @@ footer {
       <div class="contact-form reveal">
         <div class="form-title">Send a Message</div>
         <p class="form-sub">Fill out the form below and Dymon will get back to you as soon as possible. For fastest response, call or text directly.</p>
-        <form action="mailto:dymonvaneperen10@gmail.com" method="post" enctype="text/plain">
+        <form id="contactForm">
           <div class="form-group">
             <label class="form-label" for="name">Your Name</label>
             <input class="form-input" type="text" id="name" name="name" placeholder="First &amp; Last Name" required>
@@ -1349,8 +1349,9 @@ footer {
             <label class="form-label" for="message">What's Going On?</label>
             <textarea class="form-textarea" id="message" name="message" placeholder="Describe what's happening with your vehicle and where you're located..." required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;clip-path:none;">Send Message</button>
-          <p class="form-note">* For fastest response, call or text 417-651-3040 directly. Email response within 24 hours.</p>
+          <button type="submit" id="formSubmit" class="btn btn-primary" style="width:100%;justify-content:center;clip-path:none;">Send Message</button>
+          <div id="formStatus" style="margin-top:12px;font-size:0.88rem;display:none;"></div>
+          <p class="form-note">* For fastest response, call or text 417-651-3040 directly.</p>
         </form>
       </div>
     </div>
@@ -1417,6 +1418,45 @@ footer {
       closeMenu();
     }
   });
+
+  // Contact form submission
+  const contactForm = document.getElementById('contactForm')
+  if (contactForm) {
+    contactForm.addEventListener('submit', async e => {
+      e.preventDefault()
+      const btn = document.getElementById('formSubmit')
+      const status = document.getElementById('formStatus')
+      btn.textContent = 'Sending...'
+      btn.disabled = true
+      status.style.display = 'none'
+      const data = {
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        vehicle: document.getElementById('vehicle').value,
+        message: document.getElementById('message').value,
+      }
+      try {
+        const res = await fetch('https://mobile-mechanic-app-production-af42.up.railway.app/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        const json = await res.json()
+        if (json.success) {
+          status.style.cssText = 'display:block;color:#22c55e;padding:12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);'
+          status.textContent = '✓ Message sent! Dymon will be in touch soon.'
+          contactForm.reset()
+        } else {
+          throw new Error(json.error || 'Submission failed')
+        }
+      } catch(err) {
+        status.style.cssText = 'display:block;color:#f97316;padding:12px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);'
+        status.textContent = 'Something went wrong. Please call 417-651-3040 directly.'
+      }
+      btn.textContent = 'Send Message'
+      btn.disabled = false
+    })
+  }
 
   // Smooth scroll offset for fixed nav
   document.querySelectorAll('a[href^="#"]').forEach(a => {
